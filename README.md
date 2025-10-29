@@ -54,12 +54,14 @@ Follow these instructions to set up and run the project on your local machine.
 ### Installation and Setup
 
 1.  **Clone the repository:**
+
     ```bash
-    git clone git clone https://github.com/saiteja-puttoju/ai-youtube-summarizer.git
-    cd ai-youtube-assistant
+    git clone https://github.com/saiteja-puttoju/ai-youtube-summarizer.git
+    cd ai-youtube-summarizer
     ```
 
 2.  **Create and activate a virtual environment:**
+
     ```bash
     # For Linux/macOS
     python -m venv .venv
@@ -70,12 +72,13 @@ Follow these instructions to set up and run the project on your local machine.
     .\.venv\Scripts\activate
     ```
 
-3.  **Install the required dependencies:**
+4.  **Install the required dependencies:**
+
     ```bash
     pip install -r requirements.txt
     ```
 
-4.  **Set up your environment variables:**
+6.  **Set up your environment variables:**
     * Create a new file in the root of the project named `.env`.
     * Add your Google API key to this file (this is read by `supporting_functions.py`):
       
@@ -102,7 +105,6 @@ Your web browser will automatically open to the application's user interface.
 3.  Select your desired mode: **"Notes Generator"** or **"Chat with Video"**.
 4.  Click the **"✨Execute Task"** button.
 
-<!-- end list -->
 
   * **If you selected "Notes Generator":**
 
