@@ -217,7 +217,7 @@ def generate_notes(transcript):
         st.error(f"Error with generating notes: {e}")
 
 
-
+# function to create chunks from the transcript
 def create_chunks(transcript):
     """
     Splits the transcript into smaller chunks for processing.
@@ -228,6 +228,7 @@ def create_chunks(transcript):
 
     return documents
 
+# function to create vector store from the chunks
 def create_vector_store(documents):
     """
     Creates a vector store from the given documents using Google Generative AI embeddings.
@@ -238,6 +239,7 @@ def create_vector_store(documents):
 
     return vector_store
 
+# function to answer user questions using RAG
 def rag_answer(question, vectorstore):
     """
     Answers the user's question based on the context from the vector store.
@@ -272,4 +274,3 @@ def rag_answer(question, vectorstore):
     response = chain.invoke({"context": context_text, "question": question})
 
     return response.content
-    
