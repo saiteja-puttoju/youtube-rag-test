@@ -1,99 +1,136 @@
 import streamlit as st
-from streamlit import spinner
-from streamlit.web.server.server import server_port_is_manually_set
+import re # Make sure re is imported
 
+# Import our new, reliable functions
 from supporting_functions import (
-     extract_video_id,
-     get_transcript,
-     translate_transcript,
-     generate_notes,
-     get_important_topics,
-     create_chunks,
-     create_vector_store,
-     rag_answer
+    extract_video_id,
+    get_best_transcript,
+    translate_text,
+    get_important_topics,
+    generate_notes,
+    create_chunks,
+    create_vector_store,
+    rag_answer
 )
 
 
-# --- Sidebar (Inputs) ---
+import re # Make sure re is imported
+
 with st.sidebar:
-    st.title("🎬 VidSynth AI")
-    st.markdown("---")
+    st.title("🎬 VidNote AI")
+
+    st.markdown('---')
     st.markdown("Transform any YouTube video into key topics, a podcast, or a chatbot.")
-    st.markdown("### Input Details")
+    st.markdown("# Input Details")
+    youtube_url = st.text_input("Insert YouTube URL: ", placeholder="https://www.youtube.com/watch?v=pBRSZBtirAk")
 
-    youtube_url = st.text_input("YouTube URL", placeholder="https://www.youtube.com/watch?v=...")
-    language = st.text_input("Video Language Code", placeholder="e.g., en, hi, es, fr", value="en")
+    
+    # --- Language input is REMOVED ---
 
-    task_option = st.radio(
-        "Choose what you want to generate:",
-        ["Chat with Video", "Notes For You"]
-    )
+    page = st.radio("Select the page: ", ['Notes Generator', 'Chat with Video'])
 
-    submit_button = st.button("✨ Start Processing")
-    st.markdown("---")
-    # The "New Chat" button has been removed from here.
+    submit_button = st.button("⚡Submit")
 
-# --- Main Page ---
-st.title("YouTube Content Synthesizer")
-st.markdown("Paste a video link and select a task from the sidebar.")
+st.set_page_config(
+    page_title = "YouTube AI Assistant",
+    layout = "wide",
+    page_icon = "▶️",
+    menu_items={
+    'Get Help': 'https://www.linkedin.com/in/saiteja-puttoju/',
+    'About': "LinkedIn Profile: https://www.linkedin.com/in/saiteja-puttoju/"
+    }
+)
 
+if page == "Notes Generator":
+    st.title("🗒 Instant Video Note Generator")
+    st.write("> Generate concise notes from any YouTube video using AI.")
 
+elif page == "Chat with Video":
+    st.title("🗪 Chat with Video")
 
-
-# --- Processing Flow ---
 if submit_button:
-    if youtube_url and language:
-        video_id= extract_video_id(youtube_url)
-        if video_id:
-            with spinner("Step 1/3 : Fetching Transcript....."):
-                full_transcript= get_transcript(video_id, language)
+    if not youtube_url:
+        st.warning("⚠ Please insert youtube url in sidebar!")
+    else:
 
-                if language!="en":
-                    with spinner("Step 1.5/3 : Translating Transcript into English, This may take few moments......"):
-                        full_transcript= translate_transcript(full_transcript)
+        video_id = extract_video_id(youtube_url)
+
+        with st.spinner("Step 1/3 : Fetching Video Transcripts..."):
+            # --- THIS IS THE NEW LOGIC ---
+            transcript_data, lang_code_or_error = get_best_transcript(video_id)
+
+            if not transcript_data:
+                # If it failed, show the error and stop
+                st.error(f"Failed to get transcript: {lang_code_or_error}")
+            else:
+                # If it succeeded, set our variables
+                lang_code = lang_code_or_error
+                
+                full_transcript = " ".join([line.text for line in transcript_data])
+
+        if full_transcript:
+                
+            # We can now check the language code
+            if lang_code != 'en':
+                st.info(lang_code)
+                with st.spinner("Step 1.5/3 : Translating transcripts into English..."):
+                                      
+                    full_transcript = translate_text(full_transcript)
+        
+            if page == "Notes Generator":
+                # The rest of your code runs perfectly from here
+                with st.spinner("Step 2/3 : Fetching key topics..."):
+                    
+                    topics = get_important_topics(full_transcript)
+                    st.session_state.topic = topics
+                    st.header("Key Topics: ")
+                    st.info(st.session_state.topic)
+
+                with st.spinner("Step 3/3 : Generating Notes..."):
+                    
+                    notes = generate_notes(full_transcript)
+                    st.session_state.note = notes
+                    st.header("Notes: ")
+                    st.write(st.session_state.note)
+                
+                st.success("✅ Generated notes successfully!")
 
 
-            if task_option=="Notes For You":
-                with spinner("Step 2/3: Extracting important Topics..."):
-                    import_topics= get_important_topics(full_transcript)
-                    st.subheader("Important Topics")
-                    st.write(import_topics)
-                    st.markdown("---")
-
-                with spinner("Step 3/3 : Generating Notes for you."):
-                    notes= generate_notes(full_transcript)
-                    st.subheader("Notes for you")
-                    st.write(notes)
-
-                st.success("Summary and Notes Generated.")
-
-            if task_option == "Chat with Video":
+            if page == "Chat with Video":
+                
                 with st.spinner("Step 2/3: Creating chunks and vector store...."):
                     chunks = create_chunks(full_transcript)
                     vectorstore = create_vector_store(chunks)
                     st.session_state.vector_store = vectorstore
-                st.session_state.messages=[]
-                st.success('Video is ready for chat.....')
+                st.session_state.messages = []
+                
+                st.success("Your video is ready to chat! ask your questions in the chat box.")
+
+        else:
+            st.info("Error in fetching transcripts, please try again!")
+
 
 
 # chatbot session
-if task_option=="Chat with Video" and "vector_store" in st.session_state:
-    st.divider()
-    st.subheader("Chat with Video")
+if page == "Chat with Video" and "vector_store" in st.session_state:
 
-    # Display the entire history
-    for message in st.session_state.get('messages',[]):
-        with st.chat_message(message['role']):
-            st.write(message['content'])
+    
 
-    # user_input
-    prompt= st.chat_input("Ask me anything about the video.")
+    # Display the entire chat history
+    for messages in st.session_state.get("messages", []):
+        with st.chat_message(messages["role"]):
+            st.write(messages["content"])
+
+
+    # user input
+    prompt = st.chat_input("Ask your question about the video")
     if prompt:
-        st.session_state.messages.append({'role':'user','content':prompt})
-        with st.chat_message('user'):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
             st.write(prompt)
 
-        with st.chat_message('assistant'):
-           response= rag_answer(prompt,st.session_state.vector_store)
-           st.write(response)
-        st.session_state.messages.append({'role': 'assistant', 'content':response})
+    
+        with st.chat_message("assistant"):
+            response = rag_answer(prompt, st.session_state.vector_store)        
+            st.write(response)
+        st.session_state.messages.append({"role": "assistant", "content": response})
