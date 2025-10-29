@@ -1,7 +1,7 @@
 import streamlit as st
-import re # Make sure re is imported
+import re
 
-# Import our new, reliable functions
+# Import functions
 from supporting_functions import (
     extract_video_id,
     get_best_transcript,
@@ -14,7 +14,6 @@ from supporting_functions import (
 )
 
 
-import re # Make sure re is imported
 
 with st.sidebar:
     st.title("🎬 VidNote AI")
@@ -22,6 +21,7 @@ with st.sidebar:
     st.markdown('---')
     st.markdown("Transform any YouTube video into key topics, a podcast, or a chatbot.")
     st.markdown("# Input Details")
+
     youtube_url = st.text_input("Insert YouTube URL: ", placeholder="https://www.youtube.com/watch?v=pBRSZBtirAk")
 
     
@@ -29,7 +29,7 @@ with st.sidebar:
 
     page = st.radio("Select the page: ", ['Notes Generator', 'Chat with Video'])
 
-    submit_button = st.button("⚡Submit")
+    submit_button = st.button("✨Execute Task", type="secondary")
 
 st.set_page_config(
     page_title = "YouTube AI Assistant",
@@ -72,7 +72,6 @@ if submit_button:
                 
             # We can now check the language code
             if lang_code != 'en':
-                st.info(lang_code)
                 with st.spinner("Step 1.5/3 : Translating transcripts into English..."):
                                       
                     full_transcript = translate_text(full_transcript)
@@ -83,15 +82,15 @@ if submit_button:
                     
                     topics = get_important_topics(full_transcript)
                     st.session_state.topic = topics
-                    st.header("Key Topics: ")
-                    st.info(st.session_state.topic)
+                    # st.header("Key Topics: ")
+                    # st.info(st.session_state.topic)
 
                 with st.spinner("Step 3/3 : Generating Notes..."):
                     
                     notes = generate_notes(full_transcript)
                     st.session_state.note = notes
-                    st.header("Notes: ")
-                    st.write(st.session_state.note)
+                    # st.header("Notes: ")
+                    # st.write(st.session_state.note)
                 
                 st.success("✅ Generated notes successfully!")
 
@@ -109,14 +108,21 @@ if submit_button:
         else:
             st.info("Error in fetching transcripts, please try again!")
 
+# Display Notes Generator
+if page == "Notes Generator" and "note" in st.session_state and "topic" in st.session_state:
+    st.header("Key Topics: ")
+    st.info(st.session_state.topic)
+    st.header("Notes: ")
+    st.write(st.session_state.note)
 
 
 # chatbot session
 if page == "Chat with Video" and "vector_store" in st.session_state:
 
-    
+    st.divider()
 
-    # Display the entire chat history
+
+    # Display chat messages from history
     for messages in st.session_state.get("messages", []):
         with st.chat_message(messages["role"]):
             st.write(messages["content"])
