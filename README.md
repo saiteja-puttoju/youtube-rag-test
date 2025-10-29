@@ -78,6 +78,7 @@ Follow these instructions to set up and run the project on your local machine.
 4.  **Set up your environment variables:**
     * Create a new file in the root of the project named `.env`.
     * Add your Google API key to this file (this is read by `supporting_functions.py`):
+      
         ```
         GOOGLE_API_KEY="YOUR_API_KEY_HERE"
         ```
