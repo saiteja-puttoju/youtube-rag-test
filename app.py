@@ -76,34 +76,34 @@ if submit_button:
                                       
                     full_transcript = translate_text(full_transcript)
         
-            if page == "Notes Generator":
-                # The rest of your code runs perfectly from here
-                with st.spinner("Step 2/3 : Fetching key topics..."):
-                    
-                    topics = get_important_topics(full_transcript)
-                    st.session_state.topic = topics
-                    # st.header("Key Topics: ")
-                    # st.info(st.session_state.topic)
-
-                with st.spinner("Step 3/3 : Generating Notes..."):
-                    
-                    notes = generate_notes(full_transcript)
-                    st.session_state.note = notes
-                    # st.header("Notes: ")
-                    # st.write(st.session_state.note)
+        # if page == "Notes Generator":
+            # The rest of your code runs perfectly from here
+            with st.spinner("Step 2/3 : Fetching key topics..."):
                 
-                st.success("✅ Generated notes successfully!")
+                topics = get_important_topics(full_transcript)
+                st.session_state.topic = topics
+                # st.header("Key Topics: ")
+                # st.info(st.session_state.topic)
+
+            with st.spinner("Step 3/3 : Generating Notes..."):
+                
+                notes = generate_notes(full_transcript)
+                st.session_state.note = notes
+                # st.header("Notes: ")
+                # st.write(st.session_state.note)
+            
+            st.success("✅ Generated notes successfully!")
 
 
-            if page == "Chat with Video":
-                
-                with st.spinner("Step 2/3: Creating chunks and vector store...."):
-                    chunks = create_chunks(full_transcript)
-                    vectorstore = create_vector_store(chunks)
-                    st.session_state.vector_store = vectorstore
-                st.session_state.messages = []
-                
-                st.success("Your video is ready to chat! ask your questions in the chat box.")
+        # if page == "Chat with Video":
+            
+            with st.spinner("Step 2/3: Creating chunks and vector store...."):
+                chunks = create_chunks(full_transcript)
+                vectorstore = create_vector_store(chunks)
+                st.session_state.vector_store = vectorstore
+            st.session_state.messages = []
+            
+            st.success("Your video is ready to chat! ask your questions in the chat box.")
 
         else:
             st.info("Error in fetching transcripts, please try again!")
