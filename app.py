@@ -83,7 +83,7 @@ if submit_button:
                 with st.spinner("Step 1/X : Fetching Transcript..."):
                     transcript_data, lang_code = get_best_transcript(video_id)
                     if transcript_data:
-                        full_transcript = " ".join([line['text'] for line in transcript_data])
+                        full_transcript = " ".join([line.text for line in transcript_data])
                         if lang_code != 'en':
                             with st.spinner("Translating..."):
                                 full_transcript = translate_text(full_transcript)
