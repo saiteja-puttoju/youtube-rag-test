@@ -19,7 +19,7 @@ with st.sidebar:
     st.markdown('---')
     st.markdown("Transform any YouTube video into key topics, a podcast, or a chatbot.")
     st.markdown("# Input Details")
-    youtube_url = st.text_input("Insert YouTube URL: ", placeholder="https://www.youtube.com/watch?v=pBRSZBtirAk")
+    youtube_url = st.text_input("Insert YouTube URL: ", placeholder="https.www.youtube.com/watch?v=pBRSZBtirAk")
     
     page = st.radio("Select the page: ", ['Notes Generator', 'Chat with Video'])
     submit_button = st.button("⚡Submit")
@@ -30,7 +30,7 @@ st.set_page_config(
     layout = "wide",
     page_icon = "▶️",
     menu_items={
-    'Get Help': 'https://www.linkedin.com/in/saiteja-puttoju/',
+    'Get Help': 'https.www.linkedin.com/in/saiteja-puttoju/',
     'About': "LinkedIn Profile: https://www.linkedin.com/in/saiteja-puttoju/"
     }
 )
@@ -52,7 +52,7 @@ if submit_button:
         
         if video_id:
             
-            # --- START: NEW LOGIC ---
+            # --- START: NEW LOGIC (Video ID Check) ---
             # Check if this is a new video. If it is, clear all old data.
             if st.session_state.get("current_video_id") != video_id:
                 st.session_state.current_video_id = video_id
@@ -65,50 +65,63 @@ if submit_button:
                     del st.session_state.vector_store
                 if "messages" in st.session_state:
                     del st.session_state.messages
+                # --- CRITICAL: Clear the old transcript too ---
+                if "full_transcript" in st.session_state:
+                    del st.session_state.full_transcript
                 
                 st.info("New video detected. Processing...")
             else:
                 st.info("Processing for the same video...")
-            # --- END: NEW LOGIC ---
+            # --- END: NEW LOGIC (Video ID Check) ---
             
-            # --- Process only the current page IF it hasn't been processed already ---
             
-            if page == "Notes Generator":
-                if "note" not in st.session_state:
-                    with st.spinner("Step 1/2 : Fetching Transcript..."):
-                        transcript_data, lang_code = get_best_transcript(video_id)
-                        if transcript_data:
-                            full_transcript = " ".join([line.text for line in transcript_data])
-                            if lang_code != 'en':
+            # --- START: NEW LOGIC (Transcript Fetching) ---
+            # This block runs ONCE per video.
+            # It fetches the transcript and stores it, so the
+            # page-specific blocks don't have to.
+            if "full_transcript" not in st.session_state:
+                with st.spinner("Step 1/X : Fetching Transcript..."):
+                    transcript_data, lang_code = get_best_transcript(video_id)
+                    if transcript_data:
+                        full_transcript = " ".join([line['text'] for line in transcript_data])
+                        if lang_code != 'en':
+                            with st.spinner("Translating..."):
                                 full_transcript = translate_text(full_transcript)
-                            
-                            with st.spinner("Step 2/2 : Generating Notes & Topics..."):
-                                st.session_state.topic = get_important_topics(full_transcript)
-                                st.session_state.note = generate_notes(full_transcript)
-                            st.success("✅ Notes generated successfully!")
-                        else:
-                            st.error(f"Failed to get transcript: {lang_code}")
-                else:
-                    st.success("✅ Notes already generated for this video.")
+                        # Save the processed transcript to the session
+                        st.session_state.full_transcript = full_transcript
+                    else:
+                        st.error(f"Failed to get transcript: {lang_code}")
+                        # Store None to prevent re-fetching
+                        st.session_state.full_transcript = None
+            # --- END: NEW LOGIC (Transcript Fetching) ---
 
-            if page == "Chat with Video":
-                if "vector_store" not in st.session_state:
-                    with st.spinner("Step 1/2 : Fetching Transcript..."):
-                        transcript_data, lang_code = get_best_transcript(video_id)
-                        if transcript_data:
-                            full_transcript = " ".join([line.text for line in transcript_data])
-                            if lang_code != 'en':
-                                full_transcript = translate_text(full_transcript)
-                            
-                            with st.spinner("Step 2/2 : Creating Vector Store..."):
-                                chunks = create_chunks(full_transcript)
-                                st.session_state.vector_store = create_vector_store(chunks)
-                                st.session_state.messages = [] # Start new chat
-                            st.success("✅ Chat is ready for this video!")
-                        else:
-                            st.error(f"Failed to get transcript: {lang_code}")
-                else:
-                    st.success("✅ Chat already prepared for this video.")
+
+            # Proceed only if we successfully got a transcript
+            if st.session_state.full_transcript:
+                
+                # --- Process only the current page (if it hasn't been processed) ---
+                if page == "Notes Generator":
+                    if "note" not in st.session_state:
+                        with st.spinner("Step 2/2 : Generating Notes & Topics..."):
+                            # Read the transcript from session state
+                            transcript = st.session_state.full_transcript
+                            st.session_state.topic = get_important_topics(transcript)
+                            st.session_state.note = generate_notes(transcript)
+                        st.success("✅ Notes generated successfully!")
+                    else:
+                        st.success("✅ Notes already generated for this video.")
+
+                if page == "Chat with Video":
+                    if "vector_store" not in st.session_state:
+                        with st.spinner("Step 2/2 : Creating Vector Store..."):
+                            # Read the transcript from session state
+                            transcript = st.session_state.full_transcript
+                            chunks = create_chunks(transcript)
+                            st.session_state.vector_store = create_vector_store(chunks)
+                            st.session_state.messages = [] # Start new chat
+                        st.success("✅ Chat is ready for this video!")
+                    else:
+                        st.success("✅ Chat already prepared for this video.")
         else:
             st.error("Could not find a valid YouTube video ID in the URL.")
 
