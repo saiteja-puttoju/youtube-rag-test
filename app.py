@@ -30,7 +30,7 @@ st.set_page_config(
     layout = "wide",
     page_icon = "▶️",
     menu_items={
-    'Get Help': 'https.www.linkedin.com/in/saiteja-puttoju/',
+    'Get Help': 'https://www.linkedin.com/in/saiteja-puttoju/',
     'About': "LinkedIn Profile: https://www.linkedin.com/in/saiteja-puttoju/"
     }
 )
