@@ -1,6 +1,9 @@
 # 🎬 VidNote AI: AI YouTube Summarizer & Chatbot
 
-VidNote AI is an intelligent web application built with Streamlit that generates concise notes, extracts key topics, and allows you to chat with any YouTube video. It uses the YouTube Transcript API, LangChain, and Google's Gemini AI to create a full-featured RAG (Retrieval-Augmented Generation) pipeline.
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](YOUR_STREAMLIT_APP_URL_HERE)
+[![Read on Hashnode](https://img.shields.io/badge/Hashnode-Read_Blog_Post-blue?style=for-the-badge&logo=hashnode)](https://saitejaputtoju.hashnode.dev/how-i-added-a-chat-with-video-rag-system-to-my-ai-app)
+
+**VidNote AI** is an intelligent web application built with Streamlit that generates concise notes, extracts key topics, and allows you to chat with any YouTube video. It uses the YouTube Transcript API, LangChain, and Google's Gemini AI to create a full-featured RAG (Retrieval-Augmented Generation) pipeline.
 
 
 
@@ -54,14 +57,12 @@ Follow these instructions to set up and run the project on your local machine.
 ### Installation and Setup
 
 1.  **Clone the repository:**
-
     ```bash
-    git clone https://github.com/saiteja-puttoju/ai-youtube-summarizer.git
-    cd ai-youtube-summarizer
+    git clone [https://github.com/saiteja-puttoju/ai-youtube-assistant.git](https://github.com/saiteja-puttoju/ai-youtube-assistant.git)
+    cd ai-youtube-assistant
     ```
 
 2.  **Create and activate a virtual environment:**
-
     ```bash
     # For Linux/macOS
     python -m venv .venv
@@ -72,16 +73,14 @@ Follow these instructions to set up and run the project on your local machine.
     .\.venv\Scripts\activate
     ```
 
-4.  **Install the required dependencies:**
-
+3.  **Install the required dependencies:**
     ```bash
     pip install -r requirements.txt
     ```
 
-6.  **Set up your environment variables:**
+4.  **Set up your environment variables:**
     * Create a new file in the root of the project named `.env`.
     * Add your Google API key to this file (this is read by `supporting_functions.py`):
-      
         ```
         GOOGLE_API_KEY="YOUR_API_KEY_HERE"
         ```
@@ -92,25 +91,3 @@ Once the setup is complete, you can run the Streamlit application with the follo
 
 ```bash
 streamlit run app.py
-````
-
-Your web browser will automatically open to the application's user interface.
-
------
-
-## How to Use
-
-1.  Open the application in your browser.
-2.  On the sidebar, paste the full **YouTube URL** into the text input.
-3.  Select your desired mode: **"Notes Generator"** or **"Chat with Video"**.
-4.  Click the **"✨Execute Task"** button.
-
-
-  * **If you selected "Notes Generator":**
-
-      * The app will fetch the transcript, generate key topics, and display the detailed notes on the main page.
-
-  * **If you selected "Chat with Video":**
-
-      * The app will process the video and create a vector store.
-      * Once it's ready, a chat box will appear. You can now ask any question about the video's content.
